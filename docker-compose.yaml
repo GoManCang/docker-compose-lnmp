@@ -1,0 +1,47 @@
+version: "3.7"
+
+services:
+  mysql:
+    image: mysql:5.7.25
+    restart: on-failure
+    volumes:
+      - ./mysql/conf/my.cnf:/etc/mysql/conf.d/mysql.cnf:ro
+      - ./mysql/data:/var/lib/mysql
+    environment:
+      MYSQL_USER: "blog"
+      MYSQL_PASSWORD: "blog"
+      MYSQL_DATABASE: "blog"
+      MYSQL_ROOT_PASSWORD: "root"
+    networks:
+      - blog-net
+
+  php-fpm:
+    build: ./php-fpm
+    volumes:
+      - ./website:/var/www/html
+      - ./php-fpm/php.ini:/usr/local/etc/php/php.ini
+    depends_on:
+      - mysql
+    networks:
+      - blog-net
+
+  nginx:
+    image: nginx:1.15.9
+    restart: on-failure
+    ports:
+      - "7080:80"
+      - "7443:443"
+    volumes:
+      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf/vhost:/etc/nginx/conf.d:ro
+      - ./nginx/log:/var/log/nginx
+      - ./website:/usr/share/nginx/html
+    environment:
+      - "TZ=Asia/Shanghai"
+    depends_on:
+      - php-fpm
+    networks:
+      - blog-net
+
+networks:
+  blog-net:
