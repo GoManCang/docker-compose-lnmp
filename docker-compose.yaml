@@ -12,6 +12,7 @@ services:
       MYSQL_PASSWORD: "blog"
       MYSQL_DATABASE: "blog"
       MYSQL_ROOT_PASSWORD: "root"
+      TZ: Asia/Shanghai
     networks:
       - blog-net
 
